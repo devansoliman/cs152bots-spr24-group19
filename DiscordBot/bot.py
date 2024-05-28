@@ -283,7 +283,21 @@ class ModBot(discord.Client):
             response = service.comments().analyze(body=analyze_request).execute()
             scores = response['attributeScores']
         except Exception as e:
-            return {}
+            # Get the stack trace as a string
+            stack_trace = traceback.format_exc()
+            
+            # Construct the error message with detailed information
+            error_message = (
+                "Oops! Something went wrong. Here's the error message and additional details:\n\n"
+                f"Error Type: {type(e).__name__}\n"
+                f"Error Details: {str(e)}\n\n"
+                "Stack Trace:\n"
+                f"{stack_trace}"
+            )
+            
+            # Send the detailed error message to the Discord channel
+            await message.channel.send(error_message)
+            return
         
         thresholds = {
             'toxicity': 0.8,
