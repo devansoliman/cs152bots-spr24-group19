@@ -2,4 +2,4 @@
 DiscordBot/tokens.json
 TABot/tokens.json
 DiscordBot/service-account.json
-.env
+DiscordBot/.env
