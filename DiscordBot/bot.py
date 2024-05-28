@@ -312,7 +312,6 @@ class ModBot(discord.Client):
             reply += "This message does not violate our policy for insults and toxicity" + "\n-\n-\n"
 
         await mod_channel.send(reply)
-        return 
 
     async def gemini_review(self, message):
         mod_channel = self.mod_channels[message.guild.id]
