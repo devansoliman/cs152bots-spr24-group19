@@ -93,7 +93,7 @@ class Report:
                         reply += category
                         reply += " |"
                     return [reply]
-                
+
                 # harassment flow
                 elif (message.content.lower() == "harassment"):
                     self.report_type = "harassment"
@@ -106,7 +106,7 @@ class Report:
                         reply += " |"
                     return [reply]
 
-                #spam flow
+                # spam flow
                 elif (message.content.lower() == "spam"):
                     self.report_type = "spam"
                     self.state = State.SPAM_IDENTIFIED
@@ -118,7 +118,7 @@ class Report:
                         reply += " |"
                     return [reply]
 
-                #offensive content flow
+                # offensive content flow
                 elif (message.content.lower() == "offensive content"):
                     self.report_type = "offensive content"
                     self.state = State.OFFENSIVE_CONTENT_IDENTIFIED
@@ -129,7 +129,8 @@ class Report:
                         reply += category
                         reply += " |"
                     return [reply]
-                    
+
+                # terrorism flow
                 else:
                     self.state = State.TERROR_IDENTIFIED
                     reply = "Please specify the type of terrorist activity: \n"
@@ -140,17 +141,6 @@ class Report:
                         reply += " |"
                     return [reply]
 
-                
-
-                """
-                elif (message.content.lower() in self.level_one_categories and message.content.lower() != "terrorist activity"): ## category isn't terorrism but is valid
-                    self.report_type = message.content.lower()
-                    self.state = State.MODERATE_READY
-                    reply = "Thank you for reporting a message as being " + message.content.lower() + ". The content moderation team will review the post and determine the appropriate action, which may include removal of the post or suspension of the account."
-                    return [reply]
-                """
-               
-                    
             except Exception as e:
                 return ["What is happening? This is: ", str(e)]
 
