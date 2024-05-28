@@ -272,7 +272,7 @@ class ModBot(discord.Client):
         )
         analyze_request = {
             'comment': {'text': message.content, 'type': 'PLAIN_TEXT'},
-            'languages': ["eng"],
+            'languages': ["en"],
             'requestedAttributes': {
                 'TOXICITY': {},
                 'INSULT': {},
