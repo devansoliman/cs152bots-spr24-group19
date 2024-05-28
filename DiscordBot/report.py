@@ -190,7 +190,7 @@ class Report:
             if (message.content.lower() not in self.offensive_categories):
                 reply = "The category you wrote, '" + message.content + "', is not a valid category. Please reenter one of the given options. \n"
                 reply += "|"
-                for category in self.terrorism_categories:
+                for category in self.offensive_categories:
                     reply += " "
                     reply += category
                     reply += " |"
