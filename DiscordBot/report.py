@@ -11,6 +11,8 @@ class State(Enum):
     HARASSMENT_IDENTIFIED = auto()
     SPAM_IDENTIFIED = auto()
     OFFENSIVE_CONTENT_IDENTIFIED = auto()
+    ASK_MINORS_INVOLVED = auto()
+    ASK_IMMINENT_DANGER = auto()
     MODERATE_READY = auto()
     REPORT_COMPLETE = auto()
 
@@ -187,19 +189,45 @@ class Report:
 
         # follow up on OFFENSIVE CONTENT report
         if self.state == State.OFFENSIVE_CONTENT_IDENTIFIED:
-            if (message.content.lower() not in self.offensive_categories):
-                reply = "The category you wrote, '" + message.content + "', is not a valid category. Please reenter one of the given options. \n"
-                reply += "|"
-                for category in self.offensive_categories:
-                    reply += " "
-                    reply += category
-                    reply += " |"
-                return [reply]
-            else:
-                self.report_type = message.content.lower()
-                self.State = State.MODERATE_READY
-                reply = "Thank you for reporting offensive content including " + message.content.lower() + ". We take the safety of our users and communities seriously. If you or someone else is in imminent danger, please call 911. The content moderation team will review the activity and determine the appropriate action, which may involve contacting local authorities, removing the post, and suspending the offending account."
-        
+            try:
+                if (message.content.lower() not in self.offensive_categories):
+                    reply = "The category you wrote, '" + message.content + "', is not a valid category. Please reenter one of the given options. \n"
+                    reply += "|"
+                    for category in self.offensive_categories:
+                        reply += " "
+                        reply += category
+                        reply += " |"
+                    return [reply]
+                else:
+                    self.report_type = message.content.lower()
+                    self.State = State.ASK_MINORS_INVOLVED # ask follow up questions
+                    reply = "Thank you for reporting a post because it includes " + message.content.lower() + ". Does the content involve children or minors? (Reply 'Yes' or 'No') \n"
+                    return [reply]
+
+        # offensive content follow-up: minors involved
+        if self.state == State.ASK_MINORS_INVOLVED:
+            try:
+                if (message.content.lower() not in ['yes', 'no']):
+                    reply = "Please respond with yes or no."
+                    return [reply]
+                else:
+                    self.report_type = message.content.lower()
+                    self.State = State.ASK_IMMINENT_DANGER
+                    reply = "One more question, is someone in imminent danger? (Reply 'Yes' or 'No') \n"
+                    return [reply]
+
+        # offensive content follow-up: imminent danger??
+        if self.state == State.ASK_IMMINENT_DANGER:
+            try:
+                if (message.content.lower() not in ['yes', 'no']):
+                    reply = "Please respond with yes or no."
+                    return [reply]
+                else:
+                    self.report_type = message.content.lower()
+                    self.State = State.MODERATE_READY
+                    reply = "Thank you for reporting. If you or someone else is in danger, please call 911. The content moderation team will review the post and determine the appropriate action, which may involve law enforcement and include removal of the post and suspension of the offending account."
+                    return [reply]
+
         #follow up on TERRORISM
         if self.state == State.TERROR_IDENTIFIED:
             try: 
