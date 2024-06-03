@@ -231,7 +231,10 @@ class Report:
                     reply = "Please respond with yes or no."
                     return [reply]
                 else:
-                    self.minors_involved = message.content.lower()
+                    if message.content.lower() == "yes":
+                        self.minors_involved = True
+                    else:
+                        self.minors_involved = False
                     self.state = State.ASK_IMMINENT_DANGER
                     reply = "One more question, is someone in imminent danger? (Reply 'Yes' or 'No') \n"
                     return [reply]
@@ -245,7 +248,10 @@ class Report:
                     reply = "Please respond with yes or no."
                     return [reply]
                 else:
-                    self.imminent_danger = message.content.lower()
+                    if message.content.lower() == "yes":
+                        self.imminent_danger = True
+                    else:
+                        self.imminent_danger = False
                     self.state = State.MODERATE_READY
                     reply = "Thank you for reporting. If you or someone else is in danger, please call 911. The content moderation team will review the post and determine the appropriate action, which may involve law enforcement and include removal of the post and suspension of the offending account."
                     return [reply]
