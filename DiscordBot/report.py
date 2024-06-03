@@ -13,6 +13,7 @@ class State(Enum):
     OFFENSIVE_CONTENT_IDENTIFIED = auto()
     ASK_MINORS_INVOLVED = auto()
     ASK_IMMINENT_DANGER = auto()
+    AWAITING_BLOCK_RESPONSE = auto()
     MODERATE_READY = auto()
     REPORT_COMPLETE = auto()
 
@@ -178,13 +179,27 @@ class Report:
                         reply += category
                         reply += " |"
                     return [reply]
-                else: # how to add follow up question on target of harassment??
+                else: 
                     self.report_type = message.content.lower()
-                    self.state = State.MODERATE_READY
-                    reply = "Thank you for reporting a post including " + message.content.lower() + " The content moderation team will review the activity and determine the appropriate action, which may include removal of the post and/or suspension of the offending account. Would you like to block the user?"
-                    # need to add another layer of response for blocking
+                    self.state = State.AWAITING_BLOCK_RESPONSE
+                    reply = "Thank you for reporting a post including " + message.content.lower() + " The content moderation team will review the activity and determine the appropriate action, which may include removal of the post and/or suspension of the offending account. Would you like to block the user? (Reply 'Yes' or 'No')"
                     return [reply]
 
+            except Exception as e:
+                return ["Uhhhh, here's an error: ", str(e)]
+            
+        if self.state == State.AWAITING_BLOCK_RESPONSE:
+            try:
+                if message.content.lower() not in self.yes_no:
+                    reply = "Please respond with 'Yes' or 'No'."
+                    return [reply]
+                else:
+                    self.state = State.MODERATE_READY  # Transition to MODERATE_READY after response
+                    if message.content.lower() == 'yes':
+                        reply = "The user has been blocked. The content moderation team will review the report."
+                    else:
+                        reply = "The content moderation team will review the report."
+                        return [reply]
             except Exception as e:
                 return ["Uhhhh, here's an error: ", str(e)]
 
