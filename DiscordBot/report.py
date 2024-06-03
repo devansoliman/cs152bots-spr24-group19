@@ -37,6 +37,8 @@ class Report:
         self.offensive_categories = ["physical abuse", "nudity or sexual content", "self harm or suicide", "violent threat", "human trafficking", "graphic violence"]
         self.terrorism_categories = ["glorification or promotion", "financing", "recruitment", "direct threat or incitement", "account represents terrorist entity"]
         self.yes_no = ["yes", "no"]
+        self.minors_involved = None
+        self.imminent_danger = None
         #self.target_identity = ["me", "someone else"]
     
     async def handle_message(self, message):
@@ -229,7 +231,7 @@ class Report:
                     reply = "Please respond with yes or no."
                     return [reply]
                 else:
-                    self.report_type = message.content.lower()
+                    self.minors_involved = message.content.lower()
                     self.state = State.ASK_IMMINENT_DANGER
                     reply = "One more question, is someone in imminent danger? (Reply 'Yes' or 'No') \n"
                     return [reply]
@@ -243,7 +245,7 @@ class Report:
                     reply = "Please respond with yes or no."
                     return [reply]
                 else:
-                    self.report_type = message.content.lower()
+                    self.imminent_danger = message.content.lower()
                     self.state = State.MODERATE_READY
                     reply = "Thank you for reporting. If you or someone else is in danger, please call 911. The content moderation team will review the post and determine the appropriate action, which may involve law enforcement and include removal of the post and suspension of the offending account."
                     return [reply]
