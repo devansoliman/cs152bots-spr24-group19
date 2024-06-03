@@ -285,7 +285,7 @@ class Report:
         return []
     
     def get_report_info(self):
-        return [self.report_type, self.reported_content]
+        return [self.report_type, self.reported_content, self.minors_involved, self.imminent_danger]
     
     def get_moderation_message_to_user(self):
         try:
