@@ -203,6 +203,8 @@ class Report:
                     self.State = State.ASK_MINORS_INVOLVED # ask follow up questions
                     reply = "Thank you for reporting a post because it includes " + message.content.lower() + ". Does the content involve children or minors? (Reply 'Yes' or 'No') \n"
                     return [reply]
+            except:
+                pass
 
         # offensive content follow-up: minors involved
         if self.state == State.ASK_MINORS_INVOLVED:
@@ -215,6 +217,8 @@ class Report:
                     self.State = State.ASK_IMMINENT_DANGER
                     reply = "One more question, is someone in imminent danger? (Reply 'Yes' or 'No') \n"
                     return [reply]
+            except:
+                pass
 
         # offensive content follow-up: imminent danger??
         if self.state == State.ASK_IMMINENT_DANGER:
@@ -227,6 +231,8 @@ class Report:
                     self.State = State.MODERATE_READY
                     reply = "Thank you for reporting. If you or someone else is in danger, please call 911. The content moderation team will review the post and determine the appropriate action, which may involve law enforcement and include removal of the post and suspension of the offending account."
                     return [reply]
+            except:
+                pass
 
         #follow up on TERRORISM
         if self.state == State.TERROR_IDENTIFIED:
