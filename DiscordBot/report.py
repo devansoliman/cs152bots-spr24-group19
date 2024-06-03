@@ -209,7 +209,7 @@ class Report:
         # offensive content follow-up: minors involved
         if self.state == State.ASK_MINORS_INVOLVED:
             try:
-                if (message.content.lower() not in ['yes', 'no']):
+                if (message.content.lower() not in ["yes", "no"]):
                     reply = "Please respond with yes or no."
                     return [reply]
                 else:
@@ -223,7 +223,7 @@ class Report:
         # offensive content follow-up: imminent danger??
         if self.state == State.ASK_IMMINENT_DANGER:
             try:
-                if (message.content.lower() not in ['yes', 'no']):
+                if (message.content.lower() not in ["yes", "no"]):
                     reply = "Please respond with yes or no."
                     return [reply]
                 else:
