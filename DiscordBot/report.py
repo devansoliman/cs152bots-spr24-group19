@@ -35,6 +35,7 @@ class Report:
         self.spam_categories = ["solicitation", "impersonation"]
         self.offensive_categories = ["physical abuse", "nudity or sexual content", "self harm or suicide", "violent threat", "human trafficking", "graphic violence"]
         self.terrorism_categories = ["glorification or promotion", "financing", "recruitment", "direct threat or incitement", "account represents terrorist entity"]
+        self.yes_no = ["yes", "no"]
         #self.target_identity = ["me", "someone else"]
     
     async def handle_message(self, message):
@@ -209,7 +210,7 @@ class Report:
         # offensive content follow-up: minors involved
         if self.state == State.ASK_MINORS_INVOLVED:
             try:
-                if (message.content.lower() not in ["yes", "no"]):
+                if (message.content.lower() not in self.yes_no):
                     reply = "Please respond with yes or no."
                     return [reply]
                 else:
@@ -223,7 +224,7 @@ class Report:
         # offensive content follow-up: imminent danger??
         if self.state == State.ASK_IMMINENT_DANGER:
             try:
-                if (message.content.lower() not in ["yes", "no"]):
+                if (message.content.lower() not in self.yes_no):
                     reply = "Please respond with yes or no."
                     return [reply]
                 else:
