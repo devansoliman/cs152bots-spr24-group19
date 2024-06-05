@@ -425,23 +425,23 @@ What is a Violation of our Policy?
             user_flag = 0
             server_reply = "\nSERVER_ACTION\n"
             server_reply += "The following post has been deleted from the platform after automatic detection via Google Gemini of a violation of our policy on terrorism. \n"
-            server_reply += "```" + message.author.name + ": " + message.content + "```"
+            server_reply += "```" + message.author.name + ": " + message.content + "```" + "\n-\n-\n"
 
             if response.text.lower() == "none":
-                logs_reply += "Gemini classified this message as: likely not a violation" + "\n-\n-\n"
+                logs_reply += "Gemini classified this message as: likely not a violation" + "\n"
             else:
-                logs_reply += "Gemini classified this message as: " + response.text.lower() + "\n-\n-\n"
+                logs_reply += "Gemini classified this message as: " + response.text.lower() + "\n"
             
 
 
             if response.text.lower() in categories:
                 logs_reply += "As such, the message has been deleted from our platform."
                 if response.text.lower() != "glorification/promotion":
-                    logs_reply += "A report has also been made to law enforcement for the user & corresponding message."
+                    logs_reply += "A report has also been made to law enforcement for the user & corresponding message." + "\n-\n-\n"
                     await mod_channel.send(logs_reply)
                     await asyncio.sleep(2)
                 else:
-                    logs_reply += " If applicable, the content has been also been uploaded to the GIFCT hash bank if it wasn't already."
+                    logs_reply += " If applicable, the content has been also been uploaded to the GIFCT hash bank if it wasn't already." + "\n-\n-\n"
                     await mod_channel.send(logs_reply)
                     await asyncio.sleep(2)
                 await mod_channel.send(server_reply)
