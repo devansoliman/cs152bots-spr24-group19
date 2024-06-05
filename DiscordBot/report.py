@@ -11,6 +11,9 @@ class State(Enum):
     HARASSMENT_IDENTIFIED = auto()
     SPAM_IDENTIFIED = auto()
     OFFENSIVE_CONTENT_IDENTIFIED = auto()
+    ASK_MINORS_INVOLVED = auto()
+    ASK_IMMINENT_DANGER = auto()
+    AWAITING_BLOCK_RESPONSE = auto()
     MODERATE_READY = auto()
     REPORT_COMPLETE = auto()
 
@@ -33,6 +36,9 @@ class Report:
         self.spam_categories = ["solicitation", "impersonation"]
         self.offensive_categories = ["physical abuse", "nudity or sexual content", "self harm or suicide", "violent threat", "human trafficking", "graphic violence"]
         self.terrorism_categories = ["glorification or promotion", "financing", "recruitment", "direct threat or incitement", "account represents terrorist entity"]
+        self.yes_no = ["yes", "no"]
+        self.minors_involved = None
+        self.imminent_danger = None
         #self.target_identity = ["me", "someone else"]
     
     async def handle_message(self, message):
@@ -175,31 +181,83 @@ class Report:
                         reply += category
                         reply += " |"
                     return [reply]
-                else: # how to add follow up question on target of harassment??
+                else: 
                     self.report_type = message.content.lower()
-                    self.state = State.MODERATE_READY
-                    reply = "Thank you for reporting a post including " + message.content.lower() + " The content moderation team will review the activity and determine the appropriate action, which may include removal of the post and/or suspension of the offending account. Would you like to block the user?"
-                    # need to add another layer of response for blocking
+                    self.state = State.AWAITING_BLOCK_RESPONSE
+                    reply = "Thank you for reporting a post including " + message.content.lower() + " The content moderation team will review the activity and determine the appropriate action, which may include removal of the post and/or suspension of the offending account. Would you like to block the user? (Reply 'Yes' or 'No')"
                     return [reply]
 
+            except Exception as e:
+                return ["Uhhhh, here's an error: ", str(e)]
+            
+        if self.state == State.AWAITING_BLOCK_RESPONSE:
+            try:
+                if message.content.lower() not in self.yes_no:
+                    reply = "Please respond with 'Yes' or 'No'."
+                    return [reply]
+                else:
+                    self.state = State.MODERATE_READY  # Transition to MODERATE_READY after response
+                    if message.content.lower() == 'yes':
+                        reply = "The user has been blocked. The content moderation team will review the report."
+                    else:
+                        reply = "The content moderation team will review the report."
+                        return [reply]
             except Exception as e:
                 return ["Uhhhh, here's an error: ", str(e)]
 
         # follow up on OFFENSIVE CONTENT report
         if self.state == State.OFFENSIVE_CONTENT_IDENTIFIED:
-            if (message.content.lower() not in self.offensive_categories):
-                reply = "The category you wrote, '" + message.content + "', is not a valid category. Please reenter one of the given options. \n"
-                reply += "|"
-                for category in self.offensive_categories:
-                    reply += " "
-                    reply += category
-                    reply += " |"
-                return [reply]
-            else:
-                self.report_type = message.content.lower()
-                self.State = State.MODERATE_READY
-                reply = "Thank you for reporting offensive content including " + message.content.lower() + ". We take the safety of our users and communities seriously. If you or someone else is in imminent danger, please call 911. The content moderation team will review the activity and determine the appropriate action, which may involve contacting local authorities, removing the post, and suspending the offending account."
-        
+            try:
+                if (message.content.lower() not in self.offensive_categories):
+                    reply = "The category you wrote, '" + message.content + "', is not a valid category. Please reenter one of the given options. \n"
+                    reply += "|"
+                    for category in self.offensive_categories:
+                        reply += " "
+                        reply += category
+                        reply += " |"
+                    return [reply]
+                else:
+                    self.report_type = message.content.lower()
+                    self.state = State.ASK_MINORS_INVOLVED # ask follow up questions
+                    reply = "Thank you for reporting a post because it includes " + message.content.lower() + ". Does the content involve children or minors? (Reply 'Yes' or 'No') \n"
+                    return [reply]
+            except:
+                pass
+
+        # offensive content follow-up: minors involved
+        if self.state == State.ASK_MINORS_INVOLVED:
+            try:
+                if (message.content.lower() not in self.yes_no):
+                    reply = "Please respond with yes or no."
+                    return [reply]
+                else:
+                    if message.content.lower() == "yes":
+                        self.minors_involved = True
+                    else:
+                        self.minors_involved = False
+                    self.state = State.ASK_IMMINENT_DANGER
+                    reply = "One more question, is someone in imminent danger? (Reply 'Yes' or 'No') \n"
+                    return [reply]
+            except:
+                pass
+
+        # offensive content follow-up: imminent danger??
+        if self.state == State.ASK_IMMINENT_DANGER:
+            try:
+                if (message.content.lower() not in self.yes_no):
+                    reply = "Please respond with yes or no."
+                    return [reply]
+                else:
+                    if message.content.lower() == "yes":
+                        self.imminent_danger = True
+                    else:
+                        self.imminent_danger = False
+                    self.state = State.MODERATE_READY
+                    reply = "Thank you for reporting. If you or someone else is in danger, please call 911. The content moderation team will review the post and determine the appropriate action, which may involve law enforcement and include removal of the post and suspension of the offending account."
+                    return [reply]
+            except:
+                pass
+
         #follow up on TERRORISM
         if self.state == State.TERROR_IDENTIFIED:
             try: 
@@ -233,7 +291,7 @@ class Report:
         return []
     
     def get_report_info(self):
-        return [self.report_type, self.reported_content]
+        return [self.report_type, self.reported_content, self.minors_involved, self.imminent_danger]
     
     def get_moderation_message_to_user(self):
         try:
