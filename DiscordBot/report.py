@@ -295,7 +295,7 @@ class Report:
     
     def get_moderation_message_to_user(self):
         try:
-            report_type, reported_content = self.get_report_info()
+            report_type, reported_content, _, _ = self.get_report_info()
             #reported_guild = reported_content[0]
             #reported_channel = reported_content[1]
             reported_message = reported_content[2]
@@ -326,7 +326,7 @@ class Report:
 
     def get_platform_action(self):
         try:
-            report_type, reported_content = self.get_report_info()
+            report_type, reported_content, _, _ = self.get_report_info()
 
             reported_message = reported_content[2]
             reply = "\nSERVER_ACTION (pending moderator approval)\n"
