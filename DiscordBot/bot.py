@@ -304,9 +304,9 @@ class ModBot(discord.Client):
             return
         
         low_thresholds = {
-            "toxicity": 0.6,
+            "toxicity": 0.7,
             "severe_toxicity": 0.5,
-            "insult": 0.6,
+            "insult": 0.7,
             "profanity": 0.6,
             "identity_attack": 0.5,
             "threat": 0.5,
@@ -359,17 +359,29 @@ class ModBot(discord.Client):
             project_id = "moderation-424102"  ## for parker's gcloud account, please use responsibly <3
             vertexai.init(project=project_id, location="us-central1")
             model = GenerativeModel(model_name="gemini-1.0-pro-002")
-            prompt = "I run a social media company. Our platform's policy is that we explicitly prohibit messages that promote or glorify terrorism, regardless of the context. Does the following message appear to violate our policy? Evaluate objectively, no opinion is necessary. We will have a human verify. Answer yes or no. Here is the message: " + message.content
+            categories = ["glorification/gromotion", "terrorist account", "recruitment", "direct threat/incitement", "financing terrorism", "none"]
+
+            prompt = f"You are a content moderator for a social media platform. You are evaluating the following message posted on your platform:\n{message.content}\n\nUsing the following policy guidelines, evaluate whether the message violates the policies outlined. Choose the best answer between Glorification/Promotion, Terrorist Account, Recruitment, Direct Threat/Incitement, Financing Terrorism, and None for which category the message belongs to. Evaluate based off of our policy, and output the exact category it belongs to. Don't output anything else. Here is the policy:\n{policy}"
+
+            #prompt = "I run a social media company. Our platform's policy is that we explicitly prohibit messages that promote or glorify terrorism, regardless of the context. Does the following message appear to violate our policy? Evaluate objectively, no opinion is necessary. We will have a human verify. Answer yes or no. Here is the message: " + message.content
+            
             response = model.generate_content(
                 prompt
             )
             reply = "GEMINI_REVIEW: " + message.content + "\n"
-            reply += "Does this message violate our policy? " + response.text + "\n-\n-\n"
+
+            if response.text.lower() in categories:
+                reply += "This message violates our policy for: " + response.text.lower() + "\n-\n-\n"
+
+            else: 
+                reply += "This message does not violate our policy on terrorism " + "\n-\n-\n"
+
+            reply += "just for logging, this was the actual gemini reply" + response.text
+            
             await mod_channel.send(f'Forwarded message:\n{message.author.name}: "{message.content}"')
             await asyncio.sleep(1)
             await mod_channel.send(reply)
-            scores = self.eval_text(message.content)
-            await mod_channel.send(self.code_format(scores))
+
 
         except Exception as e:
                 # Get the stack trace as a string
