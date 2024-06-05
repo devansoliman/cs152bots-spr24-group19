@@ -321,35 +321,59 @@ class ModBot(discord.Client):
             "threat": 0.75,
         }
 
-        reply = "PERSPECTIVE_REVIEW_FOR_MESSAGE: " + message.content + "\n"
-        if scores.get("TOXICITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["toxicity"]:
-            reply += "This message def violates our policy for toxicity" + "\n-\n-\n"
-        elif scores.get("SEVERE_TOXICITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["severe_toxicity"]:
-            reply += "This message def violates our policy for severe toxicity" + "\n-\n-\n"
-        elif scores.get("INSULT", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["insult"]:
-            reply += "This message def violates our policy for insults" + "\n-\n-\n"
-        elif scores.get("PROFANITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["profanity"]:
-            reply += "This message def violates our policy for profanity" + "\n-\n-\n"
-        elif scores.get("IDENTITY_ATTACK", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["identity_attack"]:
-            reply += "This message def violates our policy for identity_attack" + "\n-\n-\n"
-        elif scores.get("THREAT", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["threat"]:
-            reply += "This message def violates our policy for threat" + "\n-\n-\n"    
-        elif scores.get("TOXICITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["toxicity"]:
-            reply += "This message probs violates our policy for toxicity" + "\n-\n-\n"
-        elif scores.get("SEVERE_TOXICITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["severe_toxicity"]:
-            reply += "This message probs violates our policy for severe toxicity" + "\n-\n-\n"
-        elif scores.get("INSULT", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["insult"]:
-            reply += "This message probs violates our policy for insults" + "\n-\n-\n"
-        elif scores.get("PROFANITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["profanity"]:
-            reply += "This message probs violates our policy for profanity" + "\n-\n-\n"
-        elif scores.get("IDENTITY_ATTACK", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["identity_attack"]:
-            reply += "This message probs violates our policy for identity_attack" + "\n-\n-\n"
-        elif scores.get("THREAT", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["threat"]:
-            reply += "This message probs violates our policy for threat" + "\n-\n-\n"    
-        else:
-            reply += "This message does not violate our policy for insults and toxicity" + "\n-\n-\n"
+        logs_reply = "MESSAGE_TO_MODERATOR_LOGS: Results from Google Perspective review of the following message are below: " + message.content + "\n"
+        user_reply = "MESSAGE_TO_USER (" + message.author.name + "): You posted the following: " + message.content + "\n"
+        user_flag = 0
+        server_reply = "\nSERVER_ACTION\n"
+        server_reply += "The following post has been deleted from the platform after automatic detection via Google Perspective of a policy violation \n"
+        server_reply += "```" + message.author.name + ": " + message.content + "```"
 
-        await mod_channel.send(reply)
+        if scores.get("TOXICITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["toxicity"]:
+            logs_reply += "This message violates our policy for toxicity, and it has been deleted from the platform." + "\n-\n-\n"
+            user_flag = 1
+            user_reply += "The above post has violated our terms and conditions for toxicity and has been deleted. If you think we made a mistake, send a message to fakeaddress@fakeplatform.com to appeal." + "\n-\n-\n"
+        elif scores.get("SEVERE_TOXICITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["severe_toxicity"]:
+            logs_reply += "This message violates our policy for severe toxicity, and it has been deleted from the platform." + "\n-\n-\n"
+            user_flag = 1
+            user_reply += "The above post has violated our terms and conditions for toxicity and has been deleted. If you think we made a mistake, send a message to fakeaddress@fakeplatform.com to appeal." + "\n-\n-\n"
+        elif scores.get("INSULT", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["insult"]:
+            logs_reply += "This message violates our policy for insults, and it has been deleted from the platform." + "\n-\n-\n"
+            user_flag = 1
+            user_reply += "The above post has violated our terms and conditions for toxicity and has been deleted. If you think we made a mistake, send a message to fakeaddress@fakeplatform.com to appeal." + "\n-\n-\n"
+        elif scores.get("PROFANITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["profanity"]:
+            logs_reply += "This message violates our policy for profanity, and it has been deleted from the platform." + "\n-\n-\n"
+            user_flag = 1
+            user_reply += "The above post has violated our terms and conditions for toxicity and has been deleted. If you think we made a mistake, send a message to fakeaddress@fakeplatform.com to appeal." + "\n-\n-\n"
+        elif scores.get("IDENTITY_ATTACK", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["identity_attack"]:
+            logs_reply += "This message violates our policy for identity attacks, and it has been deleted from the platform." + "\n-\n-\n"
+            user_flag = 1
+            user_reply += "The above post has violated our terms and conditions for toxicity and has been deleted. If you think we made a mistake, send a message to fakeaddress@fakeplatform.com to appeal." + "\n-\n-\n"
+        elif scores.get("THREAT", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["threat"]:
+            logs_reply += "This message violates our policy for threats, and it has been deleted from the platform." + "\n-\n-\n"
+            user_flag = 1
+            user_reply += "The above post has violated our terms and conditions for toxicity and has been deleted. If you think we made a mistake, send a message to fakeaddress@fakeplatform.com to appeal." + "\n-\n-\n"
+        elif scores.get("TOXICITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["toxicity"]:
+            logs_reply += "This message might violates our policy for toxicity; it has been downranked in the algorithm." + "\n-\n-\n"
+        elif scores.get("SEVERE_TOXICITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["severe_toxicity"]:
+            logs_reply += "This message might violates our policy for severe_toxicty; it has been downranked in the algorithm." + "\n-\n-\n"
+        elif scores.get("INSULT", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["insult"]:
+            logs_reply += "This message might violates our policy for insults; it has been downranked in the algorithm." + "\n-\n-\n"
+        elif scores.get("PROFANITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["profanity"]:
+            logs_reply += "This message might violates our policy for profanity; it has been downranked in the algorithm." + "\n-\n-\n"
+        elif scores.get("IDENTITY_ATTACK", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["identity_attack"]:
+            logs_reply += "This message might violates our policy for indentity attacks; it has been downranked in the algorithm." + "\n-\n-\n"
+        elif scores.get("THREAT", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["threat"]:
+            logs_reply += "This message might violates our policy for threats; it has been downranked in the algorithm." + "\n-\n-\n"
+        else:
+            logs_reply += "This message does not violate our policies for general moderation; no action has been taken" + "\n-\n-\n"
+
+        await mod_channel.send(logs_reply)
+        await asyncio.sleep(1)
+        if user_flag == 1:
+            await mod_channel.send(user_reply)
+            await asyncio.sleep(1)
+            await mod_channel.send(server_reply)
+
 
     async def gemini_review(self, message):
         mod_channel = self.mod_channels[message.guild.id]
