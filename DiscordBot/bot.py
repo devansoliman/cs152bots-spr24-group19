@@ -117,7 +117,7 @@ class ModBot(discord.Client):
             # If the report is ready to be moderated, send log to moderator in mod-channel
                 if self.reports[author_id].report_moderate_ready():
                     ## extract content for logs message
-                    report_type, reported_content = self.reports[author_id].get_report_info()
+                    report_type, reported_content, _, _ = self.reports[author_id].get_report_info()
                     reported_guild = reported_content[0]
                     reported_channel = reported_content[1]
                     reported_message = reported_content[2]
