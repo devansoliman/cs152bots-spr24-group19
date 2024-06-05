@@ -446,7 +446,7 @@ What is a Violation of our Policy?
                     await asyncio.sleep(2)
                 await mod_channel.send(server_reply)
                 await asyncio.sleep(2)
-                user_reply += "This message has been deleted, as it violates our policy for: " + response.text.lower() + "\n-\n-\n"
+                user_reply += "This message has been deleted, as it violates our policy for terrorism. Please refer to our terms of service for what is acceptable on our platform." + "\n-\n-\n"
                 await mod_channel.send(user_reply)
             else:
                 logs_reply += "As such, no action will be taken." "\n-\n-\n"
