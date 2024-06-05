@@ -273,10 +273,14 @@ class ModBot(discord.Client):
         analyze_request = {
             'comment': {'text': message.content, 'type': 'PLAIN_TEXT'},
             'languages': ["en"],
-            'requestedAttributes': {
-                'TOXICITY': {},
-                'INSULT': {},
-            }
+            "requestedAttributes": {
+                "TOXICITY": {},
+                "SEVERE_TOXICITY": {},
+                "INSULT": {},
+                "PROFANITY": {},
+                "IDENTITY_ATTACK": {},
+                "THREAT": {},
+            },
         }
         try:
             # Execute the analyze request
@@ -299,15 +303,49 @@ class ModBot(discord.Client):
             await message.channel.send(error_message)
             return
         
-        thresholds = {
-            'toxicity': 0.8,
-            'insult': 0.3,
+        low_thresholds = {
+            "toxicity": 0.5,
+            "severe_toxicity": 0.5,
+            "insult": 0.5,
+            "profanity": 0.5,
+            "identity_attack": 0.5,
+            "threat": 0.5,
         }
+
+        high_thresholds = {
+            "toxicity": 0.75,
+            "severe_toxicity": 0.75,
+            "insult": 0.75,
+            "profanity": 0.75,
+            "identity_attack": 0.75,
+            "threat": 0.75,
+        }
+
         reply = "PERSPECTIVE_REVIEW_FOR_MESSAGE: " + message.content + "\n"
-        if scores.get("TOXICITY", {}).get("summaryScore", {}).get("value", 0) > thresholds["toxicity"]:
-            reply += "This message violates our policy for toxicity" + "\n-\n-\n"
-        elif scores.get("INSULT", {}).get("summaryScore", {}).get("value", 0) > thresholds["insult"]:
-            reply += "This message violates our policy for insults" + "\n-\n-\n"
+        if scores.get("TOXICITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["toxicity"]:
+            reply += "This message def violates our policy for toxicity" + "\n-\n-\n"
+        elif scores.get("SEVERE_TOXICITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["severe_toxicity"]:
+            reply += "This message def violates our policy for severe toxicity" + "\n-\n-\n"
+        elif scores.get("INSULT", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["insult"]:
+            reply += "This message def violates our policy for insults" + "\n-\n-\n"
+        elif scores.get("PROFANITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["profanity"]:
+            reply += "This message def violates our policy for profanity" + "\n-\n-\n"
+        elif scores.get("IDENTITY_ATTACK", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["identity_attack"]:
+            reply += "This message def violates our policy for identity_attack" + "\n-\n-\n"
+        elif scores.get("THREAT", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["threat"]:
+            reply += "This message def violates our policy for threat" + "\n-\n-\n"    
+        elif scores.get("TOXICITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["toxicity"]:
+            reply += "This message probs violates our policy for toxicity" + "\n-\n-\n"
+        elif scores.get("SEVERE_TOXICITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["severe_toxicity"]:
+            reply += "This message probs violates our policy for severe toxicity" + "\n-\n-\n"
+        elif scores.get("INSULT", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["insult"]:
+            reply += "This message probs violates our policy for insults" + "\n-\n-\n"
+        elif scores.get("PROFANITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["profanity"]:
+            reply += "This message probs violates our policy for profanity" + "\n-\n-\n"
+        elif scores.get("IDENTITY_ATTACK", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["identity_attack"]:
+            reply += "This message probs violates our policy for identity_attack" + "\n-\n-\n"
+        elif scores.get("THREAT", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["threat"]:
+            reply += "This message probs violates our policy for threat" + "\n-\n-\n"    
         else:
             reply += "This message does not violate our policy for insults and toxicity" + "\n-\n-\n"
 
