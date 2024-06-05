@@ -327,7 +327,7 @@ class ModBot(discord.Client):
         user_reply += "You posted the following: " + message.content + "\n"
         user_flag = 0
         server_reply = "\nSERVER_ACTION\n"
-        server_reply += "The following post has been deleted from the platform after automatic detection via Google Perspective of a policy violation \n"
+        server_reply += "The following post has been deleted from the platform after automatic detection via Google Perspective of a policy violation. \n"
         server_reply += "```" + message.author.name + ": " + message.content + "```"
 
         if scores.get("TOXICITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["toxicity"]:
@@ -412,25 +412,39 @@ What is a Violation of our Policy?
     - Propaganda that romanticizes membership of a terrorist organization.
     - Announcements or invitations to attend events or training camps organized by terrorist organizations."""
             prompt = f"You are a content moderator for a social media platform. You are evaluating the following message posted on your platform:\n{message.content}\n\nUsing the following policy guidelines, evaluate whether the message violates the policies outlined. Choose the best answer between Glorification/Promotion, Terrorist Account, Recruitment, Direct Threat/Incitement, Financing Terrorism, and None for which category the message belongs to. Evaluate based off of our policy, and output the exact category it belongs to. Don't output anything else. Here is the policy:\n{policy}"
-
-            #prompt = "I run a social media company. Our platform's policy is that we explicitly prohibit messages that promote or glorify terrorism, regardless of the context. Does the following message appear to violate our policy? Evaluate objectively, no opinion is necessary. We will have a human verify. Answer yes or no. Here is the message: " + message.content
             
             response = model.generate_content(
                 prompt
             )
-            reply = "GEMINI_REVIEW: " + message.content + "\n"
+
+
+            logs_reply = "MESSAGE_TO_MODERATOR_LOGS:\n"
+            logs_reply += "Results from Google Gemini review of the following message: " + message.content + "\n"
+            user_reply = "MESSAGE_TO_USER (" + message.author.name + "):\n"
+            user_reply += "You posted the following: " + message.content + "\n"
+            user_flag = 0
+            server_reply = "\nSERVER_ACTION\n"
+            server_reply += "The following post has been deleted from the platform after automatic detection via Google Gemini of a violation of our policy on terrorism. \n"
+            server_reply += "```" + message.author.name + ": " + message.content + "```"
+
+            logs_reply += "Gemini reviewed this message as: " + response.text.lower() + "\n-\n-\n"
+            
+
 
             if response.text.lower() in categories:
-                reply += "This message violates our policy for: " + response.text.lower() + "\n-\n-\n"
-
-            else: 
-                reply += "This message does not violate our policy on terrorism " + "\n-\n-\n"
-
-            reply += "just for logging, this was the actual gemini reply" + response.text
+                logs_reply += "As such, the message has been deleted."
+                if response.text.lower() != "glorification/promotion":
+                    logs_reply += "A report has also been made to law enforcement for the user & corresponding message."
+                    await mod_channel.send(logs_reply)
+                    await asyncio.sleep(2)
+                await mod_channel.send(server_reply)
+                await asyncio.sleep(2)
+                user_reply += "This message has been deleted, as it violates our policy for: " + response.text.lower() + "\n-\n-\n"
+                await mod_channel.send(user_reply)
+            else:
+                await mod_channel.send(logs_reply)
 
             await asyncio.sleep(5)
-            await mod_channel.send(reply)
-
 
         except Exception as e:
                 # Get the stack trace as a string
