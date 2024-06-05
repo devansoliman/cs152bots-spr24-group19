@@ -1,60 +1,71 @@
+import json
+from google.auth import default
 from google.cloud import aiplatform
+from google.cloud.aiplatform import TextDataset, TrainingData, TextTrainingDataset
+from google.cloud.aiplatform import models
+from google.cloud.aiplatform import types
+import csv
+import random
+import os
+import re
+from collections import defaultdict
 
-# REPLACE with your project ID
-project_id = "your_project_id"
 
-# REPLACE with the region where your Vertex AI resources are located
-location = "us-central1"  # Replace with your desired region
+credentials, _ = default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
 
-# REPLACE with the name of your training dataset (stored in Vertex AI)
-training_dataset_name = "gs://your-bucket/path/to/your/training_dataset.jsonl"
+# Project ID and Region (replace with your values)
+project_id = "moderation-424102"
+region = "us-west1"  # Choose your desired region
 
-# REPLACE with the name of your validation dataset (stored in Vertex AI)
-validation_dataset_name = "gs://your-bucket/path/to/your/validation_dataset.jsonl"
+# Initialize Vertex AI
+vertexai.init(project=project_id, location=region, credentials=credentials)
 
-# REPLACE with the name of the base Gemini model you want to fine-tune
-base_model_name = "projects/google-ai-platform/locations/us-central1/models/gemini-1.0-pro-002" 
+# Choose a pre-trained text classification model (replace as needed)
+model = TextClassificationModel.from_pretrained(
+    "distilbert-base-uncased"  # Consider even smaller models if needed
+)
 
-# REPLACE with a name for your custom fine-tuned model
-display_name = "my_custom_gemini_model"
+# Define training data using TextClassificationDataset
+training_data_path = "gs://152_training_data/data/152_finetuning_train.jsonl"
+validation_data_path = "gs://152_training_data/data/152_finetuning_val.jsonl"
+target_field_name = "label"
+class_labels = ["Glorification/Promotion", "Terrorist Account", "Recruitment", "Direct Threat/Incitement", "Financing Terrorism", "None"]
 
-def fine_tune_gemini(project_id, location, training_dataset_name, validation_dataset_name, base_model_name, display_name):
-  """Fine-tunes a Gemini model using Vertex AI.
+training_data = TrainingData(
+    dataset=TextClassificationDataset(
+        gcs_source=[training_data_path, validation_data_path]
+    ),
+    target_field_name=target_field_name,  # Typo fix
+    class_labels=class_labels,
+)
 
-  Args:
-      project_id: Your GCP project ID.
-      location: The region where your Vertex AI resources are located.
-      training_dataset_name: The name of your training dataset stored in Vertex AI (GCS path).
-      validation_dataset_name: The name of your validation dataset stored in Vertex AI (GCS path).
-      base_model_name: The name of the base Gemini model to fine-tune.
-      display_name: The name you want to give to your custom fine-tuned model.
-  """
+# Set a budget of $5 (converted to milli-dollars)
+budget_milli_dollars = 5 * 1000
 
-  aiplatform.init(project=project_id, location=location)
+# Early stopping (optional, adjust parameters as needed)
+early_stopping_steps = 500  # Stop training if validation performance plateaus
 
-  # Define the training job configuration
-  training_job = aiplatform.training_jobs.CustomTrainingJob(
-      display_name=display_name,
-      base_model=base_model_name,
-      # Set the task type to 'text-classification' for supervised tuning
-      task_type="text-classification",
-      # Set your training and validation dataset paths
-      dataset_spec={
-          "data_sources": [
-              {"source": training_dataset_name},
-              {"source": validation_dataset_name, "role": "validation"}
-          ]
-      },
-      # Set the container specification (adapt based on your needs)
-      container_spec={
-          "image_uri": "gcr.io/google-research/fine-tune-gemini",
-          "environment_variables": {"tuning_mode": "supervised"}
-      }
-  )
+tuning_job_settings = TextClassificationTrainingJobSettings(
+    model_type=model,
+    target_field_name=target_field_name,
+    gcs_source_uris=[training_data_path, validation_data_path],
+    class_labels=class_labels,
+    budget_milli_dollars=budget_milli_dollars,
+    early_stopping_steps=early_stopping_steps,  # Add early stopping (optional)
+)
 
-  # Run the training job
-  training_run = training_job.run()
-  print(f"Fine-tuning job submitted: {training_run.name}")
+# Create Vertex AI Endpoint
+endpoint = Endpoint(project=project_id, location=region)
 
-if __name__ == "__main__":
-  fine_tune_gemini(project_id, location, training_dataset_name, validation_dataset_name, base_model_name, display_name)
+tuning_job = endpoint.create_text_classification_training_job(
+    display_name="my-classification-job",
+    training_settings=tuning_job_settings,
+    tuning_job_location="us-west2",  # Choose a cheaper region
+)
+
+try:
+  tuning_job.wait()
+  print(f"Fine-tuning job completed: {tuning_job.name}")
+except Exception as e:
+  print(f"An error occurred: {e}")
+  # Implement additional error handling as needed
