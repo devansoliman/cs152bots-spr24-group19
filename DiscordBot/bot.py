@@ -441,7 +441,7 @@ What is a Violation of our Policy?
                     await mod_channel.send(logs_reply)
                     await asyncio.sleep(2)
                 else:
-                    logs_reply += "If applicable, the content has been also been uploaded to the GIFCT hash bank if it wasn't already."
+                    logs_reply += " If applicable, the content has been also been uploaded to the GIFCT hash bank if it wasn't already."
                     await mod_channel.send(logs_reply)
                     await asyncio.sleep(2)
                 await mod_channel.send(server_reply)
