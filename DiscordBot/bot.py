@@ -355,17 +355,17 @@ class ModBot(discord.Client):
             user_flag = 1
             user_reply += "The above post has violated our terms and conditions for toxicity and has been deleted. If you think we made a mistake, send a message to fakeaddress@fakeplatform.com to appeal." + "\n-\n-\n"
         elif scores.get("TOXICITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["toxicity"]:
-            logs_reply += "This message might violates our policy for toxicity; it has been downranked in the algorithm." + "\n-\n-\n"
+            logs_reply += "This message might violate our policy for toxicity; it has been downranked in the algorithm." + "\n-\n-\n"
         elif scores.get("SEVERE_TOXICITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["severe_toxicity"]:
-            logs_reply += "This message might violates our policy for severe_toxicty; it has been downranked in the algorithm." + "\n-\n-\n"
+            logs_reply += "This message might violate our policy for severe_toxicty; it has been downranked in the algorithm." + "\n-\n-\n"
         elif scores.get("INSULT", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["insult"]:
-            logs_reply += "This message might violates our policy for insults; it has been downranked in the algorithm." + "\n-\n-\n"
+            logs_reply += "This message might violate our policy for insults; it has been downranked in the algorithm." + "\n-\n-\n"
         elif scores.get("PROFANITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["profanity"]:
-            logs_reply += "This message might violates our policy for profanity; it has been downranked in the algorithm." + "\n-\n-\n"
+            logs_reply += "This message might violate our policy for profanity; it has been downranked in the algorithm." + "\n-\n-\n"
         elif scores.get("IDENTITY_ATTACK", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["identity_attack"]:
-            logs_reply += "This message might violates our policy for indentity attacks; it has been downranked in the algorithm." + "\n-\n-\n"
+            logs_reply += "This message might violate our policy for indentity attacks; it has been downranked in the algorithm." + "\n-\n-\n"
         elif scores.get("THREAT", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["threat"]:
-            logs_reply += "This message might violates our policy for threats; it has been downranked in the algorithm." + "\n-\n-\n"
+            logs_reply += "This message might violate our policy for threats; it has been downranked in the algorithm." + "\n-\n-\n"
         else:
             logs_reply += "This message does not violate our policies for general moderation; no action has been taken" + "\n-\n-\n"
 
@@ -427,14 +427,21 @@ What is a Violation of our Policy?
             server_reply += "The following post has been deleted from the platform after automatic detection via Google Gemini of a violation of our policy on terrorism. \n"
             server_reply += "```" + message.author.name + ": " + message.content + "```"
 
-            logs_reply += "Gemini reviewed this message as: " + response.text.lower() + "\n-\n-\n"
+            if response.text.lower() == "none":
+                logs_reply += "Gemini classified this message as: likely not a violation" + "\n-\n-\n"
+            else:
+                logs_reply += "Gemini classified this message as: " + response.text.lower() + "\n-\n-\n"
             
 
 
             if response.text.lower() in categories:
-                logs_reply += "As such, the message has been deleted."
+                logs_reply += "As such, the message has been deleted from our platform."
                 if response.text.lower() != "glorification/promotion":
                     logs_reply += "A report has also been made to law enforcement for the user & corresponding message."
+                    await mod_channel.send(logs_reply)
+                    await asyncio.sleep(2)
+                else:
+                    logs_reply += "If applicable, the content has been also been uploaded to the GIFCT hash bank if it wasn't already."
                     await mod_channel.send(logs_reply)
                     await asyncio.sleep(2)
                 await mod_channel.send(server_reply)
@@ -442,6 +449,7 @@ What is a Violation of our Policy?
                 user_reply += "This message has been deleted, as it violates our policy for: " + response.text.lower() + "\n-\n-\n"
                 await mod_channel.send(user_reply)
             else:
+                logs_reply += "As such, no action need be taken."
                 await mod_channel.send(logs_reply)
 
             await asyncio.sleep(5)

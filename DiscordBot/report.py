@@ -334,7 +334,7 @@ class Report:
             reply += "```" + reported_message.author.name + ": " + reported_message.content + "```"
 
             if report_type == "glorification or promotion":
-                reply += "The content has been also been uploaded to the GIFCT hash bank if it wasn't already."
+                reply += "If applicable, the content has been also been uploaded to the GIFCT hash bank if it wasn't already."
 
             elif report_type in self.terrorism_categories:
                 reply += "A report of this incident has been sent to local authorities and/or the FBI, including the nature of the violation, user information, and activity."
