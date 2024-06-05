@@ -304,19 +304,19 @@ class ModBot(discord.Client):
             return
         
         low_thresholds = {
-            "toxicity": 0.5,
+            "toxicity": 0.6,
             "severe_toxicity": 0.5,
-            "insult": 0.5,
-            "profanity": 0.5,
+            "insult": 0.6,
+            "profanity": 0.6,
             "identity_attack": 0.5,
             "threat": 0.5,
         }
 
         high_thresholds = {
-            "toxicity": 0.75,
+            "toxicity": 0.95,
             "severe_toxicity": 0.75,
-            "insult": 0.75,
-            "profanity": 0.75,
+            "insult": 0.95,
+            "profanity": 0.95,
             "identity_attack": 0.75,
             "threat": 0.75,
         }
