@@ -359,7 +359,7 @@ class ModBot(discord.Client):
             project_id = "moderation-424102"  ## for parker's gcloud account, please use responsibly <3
             vertexai.init(project=project_id, location="us-central1")
             model = GenerativeModel(model_name="gemini-1.0-pro-002")
-            categories = ["glorification/gromotion", "terrorist account", "recruitment", "direct threat/incitement", "financing terrorism", "none"]
+            categories = ["glorification/promotion", "terrorist account", "recruitment", "direct threat/incitement", "financing terrorism", "none"]
             policy = """Our platform prohibits content that supports or represents violent extremist organizations and entities, including those designated by the U.S. government as Foreign Terrorist Organizations. Prohibited content may fall into the following categories: Glorification and/or Promotion of Terrorism or a Terrorist Entity, Financing Terrorist Activity, Terrorist Recruitment, Direct Threats/Incitement to Violence, and Accounts Representing Terrorist Entities.
 
 What is a Violation of our Policy?
