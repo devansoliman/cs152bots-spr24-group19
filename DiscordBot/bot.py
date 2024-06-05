@@ -124,8 +124,8 @@ class ModBot(discord.Client):
 
                     old_approval_mode = self.require_approval
 
-                    if report_type == "glorification or promotion":
-                        self.require_approval = 0
+                    #if report_type == "glorification or promotion":
+                   #     self.require_approval = 0
                     
 
                     ## send logs message
