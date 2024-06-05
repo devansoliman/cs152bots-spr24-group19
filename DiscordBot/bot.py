@@ -449,7 +449,7 @@ What is a Violation of our Policy?
                 user_reply += "This message has been deleted, as it violates our policy for: " + response.text.lower() + "\n-\n-\n"
                 await mod_channel.send(user_reply)
             else:
-                logs_reply += "As such, no action need be taken."
+                logs_reply += "As such, no action will be taken." "\n-\n-\n"
                 await mod_channel.send(logs_reply)
 
             await asyncio.sleep(5)
