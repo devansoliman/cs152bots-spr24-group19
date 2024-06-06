@@ -117,15 +117,15 @@ class ModBot(discord.Client):
             # If the report is ready to be moderated, send log to moderator in mod-channel
                 if self.reports[author_id].report_moderate_ready():
                     ## extract content for logs message
-                    report_type, reported_content = self.reports[author_id].get_report_info()
+                    report_type, reported_content, _, _ = self.reports[author_id].get_report_info()
                     reported_guild = reported_content[0]
                     reported_channel = reported_content[1]
                     reported_message = reported_content[2]
 
                     old_approval_mode = self.require_approval
 
-                    if report_type == "glorification or promotion":
-                        self.require_approval = 0
+                    #if report_type == "glorification or promotion":
+                   #     self.require_approval = 0
                     
 
                     ## send logs message
@@ -321,35 +321,61 @@ class ModBot(discord.Client):
             "threat": 0.75,
         }
 
-        reply = "PERSPECTIVE_REVIEW_FOR_MESSAGE: " + message.content + "\n"
-        if scores.get("TOXICITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["toxicity"]:
-            reply += "This message def violates our policy for toxicity" + "\n-\n-\n"
-        elif scores.get("SEVERE_TOXICITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["severe_toxicity"]:
-            reply += "This message def violates our policy for severe toxicity" + "\n-\n-\n"
-        elif scores.get("INSULT", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["insult"]:
-            reply += "This message def violates our policy for insults" + "\n-\n-\n"
-        elif scores.get("PROFANITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["profanity"]:
-            reply += "This message def violates our policy for profanity" + "\n-\n-\n"
-        elif scores.get("IDENTITY_ATTACK", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["identity_attack"]:
-            reply += "This message def violates our policy for identity_attack" + "\n-\n-\n"
-        elif scores.get("THREAT", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["threat"]:
-            reply += "This message def violates our policy for threat" + "\n-\n-\n"    
-        elif scores.get("TOXICITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["toxicity"]:
-            reply += "This message probs violates our policy for toxicity" + "\n-\n-\n"
-        elif scores.get("SEVERE_TOXICITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["severe_toxicity"]:
-            reply += "This message probs violates our policy for severe toxicity" + "\n-\n-\n"
-        elif scores.get("INSULT", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["insult"]:
-            reply += "This message probs violates our policy for insults" + "\n-\n-\n"
-        elif scores.get("PROFANITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["profanity"]:
-            reply += "This message probs violates our policy for profanity" + "\n-\n-\n"
-        elif scores.get("IDENTITY_ATTACK", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["identity_attack"]:
-            reply += "This message probs violates our policy for identity_attack" + "\n-\n-\n"
-        elif scores.get("THREAT", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["threat"]:
-            reply += "This message probs violates our policy for threat" + "\n-\n-\n"    
-        else:
-            reply += "This message does not violate our policy for insults and toxicity" + "\n-\n-\n"
+        logs_reply = "MESSAGE_TO_MODERATOR_LOGS:\n"
+        logs_reply += "Results from Google Perspective review of the following message: " + message.content + "\n"
+        user_reply = "MESSAGE_TO_USER (" + message.author.name + "):\n"
+        user_reply += "You posted the following: " + message.content + "\n"
+        user_flag = 0
+        server_reply = "\nSERVER_ACTION\n"
+        server_reply += "The following post has been deleted from the platform after automatic detection via Google Perspective of a policy violation. \n"
+        server_reply += "```" + message.author.name + ": " + message.content + "```"
 
-        await mod_channel.send(reply)
+        if scores.get("TOXICITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["toxicity"]:
+            logs_reply += "This message violates our policy for toxicity, and it has been deleted from the platform." + "\n-\n-\n"
+            user_flag = 1
+            user_reply += "The above post has violated our terms and conditions for toxicity and has been deleted. If you think we made a mistake, send a message to fakeaddress@fakeplatform.com to appeal." + "\n-\n-\n"
+        elif scores.get("SEVERE_TOXICITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["severe_toxicity"]:
+            logs_reply += "This message violates our policy for severe toxicity, and it has been deleted from the platform." + "\n-\n-\n"
+            user_flag = 1
+            user_reply += "The above post has violated our terms and conditions for toxicity and has been deleted. If you think we made a mistake, send a message to fakeaddress@fakeplatform.com to appeal." + "\n-\n-\n"
+        elif scores.get("INSULT", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["insult"]:
+            logs_reply += "This message violates our policy for insults, and it has been deleted from the platform." + "\n-\n-\n"
+            user_flag = 1
+            user_reply += "The above post has violated our terms and conditions for toxicity and has been deleted. If you think we made a mistake, send a message to fakeaddress@fakeplatform.com to appeal." + "\n-\n-\n"
+        elif scores.get("PROFANITY", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["profanity"]:
+            logs_reply += "This message violates our policy for profanity, and it has been deleted from the platform." + "\n-\n-\n"
+            user_flag = 1
+            user_reply += "The above post has violated our terms and conditions for toxicity and has been deleted. If you think we made a mistake, send a message to fakeaddress@fakeplatform.com to appeal." + "\n-\n-\n"
+        elif scores.get("IDENTITY_ATTACK", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["identity_attack"]:
+            logs_reply += "This message violates our policy for identity attacks, and it has been deleted from the platform." + "\n-\n-\n"
+            user_flag = 1
+            user_reply += "The above post has violated our terms and conditions for toxicity and has been deleted. If you think we made a mistake, send a message to fakeaddress@fakeplatform.com to appeal." + "\n-\n-\n"
+        elif scores.get("THREAT", {}).get("summaryScore", {}).get("value", 0) > high_thresholds["threat"]:
+            logs_reply += "This message violates our policy for threats, and it has been deleted from the platform." + "\n-\n-\n"
+            user_flag = 1
+            user_reply += "The above post has violated our terms and conditions for toxicity and has been deleted. If you think we made a mistake, send a message to fakeaddress@fakeplatform.com to appeal." + "\n-\n-\n"
+        elif scores.get("TOXICITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["toxicity"]:
+            logs_reply += "This message might violate our policy for toxicity; it has been downranked in the algorithm." + "\n-\n-\n"
+        elif scores.get("SEVERE_TOXICITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["severe_toxicity"]:
+            logs_reply += "This message might violate our policy for severe_toxicty; it has been downranked in the algorithm." + "\n-\n-\n"
+        elif scores.get("INSULT", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["insult"]:
+            logs_reply += "This message might violate our policy for insults; it has been downranked in the algorithm." + "\n-\n-\n"
+        elif scores.get("PROFANITY", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["profanity"]:
+            logs_reply += "This message might violate our policy for profanity; it has been downranked in the algorithm." + "\n-\n-\n"
+        elif scores.get("IDENTITY_ATTACK", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["identity_attack"]:
+            logs_reply += "This message might violate our policy for indentity attacks; it has been downranked in the algorithm." + "\n-\n-\n"
+        elif scores.get("THREAT", {}).get("summaryScore", {}).get("value", 0) > low_thresholds["threat"]:
+            logs_reply += "This message might violate our policy for threats; it has been downranked in the algorithm." + "\n-\n-\n"
+        else:
+            logs_reply += "This message does not violate our policies for general moderation; no action has been taken" + "\n-\n-\n"
+
+        await mod_channel.send(logs_reply)
+        await asyncio.sleep(1)
+        if user_flag == 1:
+            await mod_channel.send(user_reply)
+            await asyncio.sleep(1)
+            await mod_channel.send(server_reply)
+
 
     async def gemini_review(self, message):
         mod_channel = self.mod_channels[message.guild.id]
@@ -359,7 +385,7 @@ class ModBot(discord.Client):
             project_id = "moderation-424102"  ## for parker's gcloud account, please use responsibly <3
             vertexai.init(project=project_id, location="us-central1")
             model = GenerativeModel(model_name="gemini-1.0-pro-002")
-            categories = ["glorification/promotion", "terrorist account", "recruitment", "direct threat/incitement", "financing terrorism", "none"]
+            categories = ["glorification/promotion", "terrorist account", "recruitment", "direct threat/incitement", "financing terrorism"]
             policy = """Our platform prohibits content that supports or represents violent extremist organizations and entities, including those designated by the U.S. government as Foreign Terrorist Organizations. Prohibited content may fall into the following categories: Glorification and/or Promotion of Terrorism or a Terrorist Entity, Financing Terrorist Activity, Terrorist Recruitment, Direct Threats/Incitement to Violence, and Accounts Representing Terrorist Entities.
 
 What is a Violation of our Policy?
@@ -386,26 +412,47 @@ What is a Violation of our Policy?
     - Propaganda that romanticizes membership of a terrorist organization.
     - Announcements or invitations to attend events or training camps organized by terrorist organizations."""
             prompt = f"You are a content moderator for a social media platform. You are evaluating the following message posted on your platform:\n{message.content}\n\nUsing the following policy guidelines, evaluate whether the message violates the policies outlined. Choose the best answer between Glorification/Promotion, Terrorist Account, Recruitment, Direct Threat/Incitement, Financing Terrorism, and None for which category the message belongs to. Evaluate based off of our policy, and output the exact category it belongs to. Don't output anything else. Here is the policy:\n{policy}"
-
-            #prompt = "I run a social media company. Our platform's policy is that we explicitly prohibit messages that promote or glorify terrorism, regardless of the context. Does the following message appear to violate our policy? Evaluate objectively, no opinion is necessary. We will have a human verify. Answer yes or no. Here is the message: " + message.content
             
             response = model.generate_content(
                 prompt
             )
-            reply = "GEMINI_REVIEW: " + message.content + "\n"
+
+
+            logs_reply = "MESSAGE_TO_MODERATOR_LOGS:\n"
+            logs_reply += "Results from Google Gemini review of the following message: " + message.content + "\n"
+            user_reply = "MESSAGE_TO_USER (" + message.author.name + "):\n"
+            user_reply += "You posted the following: " + message.content + "\n"
+            user_flag = 0
+            server_reply = "\nSERVER_ACTION\n"
+            server_reply += "The following post has been deleted from the platform after automatic detection via Google Gemini of a violation of our policy on terrorism. \n"
+            server_reply += "```" + message.author.name + ": " + message.content + "```" + "\n-\n-\n"
+
+            if response.text.lower() == "none":
+                logs_reply += "Gemini classified this message as: likely not a violation" + "\n"
+            else:
+                logs_reply += "Gemini classified this message as: " + response.text.lower() + "\n"
+            
+
 
             if response.text.lower() in categories:
-                reply += "This message violates our policy for: " + response.text.lower() + "\n-\n-\n"
+                logs_reply += "As such, the message has been deleted from our platform."
+                if response.text.lower() != "glorification/promotion":
+                    logs_reply += "A report has also been made to law enforcement for the user & corresponding message." + "\n-\n-\n"
+                    await mod_channel.send(logs_reply)
+                    await asyncio.sleep(2)
+                else:
+                    logs_reply += " If applicable, the content has been also been uploaded to the GIFCT hash bank if it wasn't already." + "\n-\n-\n"
+                    await mod_channel.send(logs_reply)
+                    await asyncio.sleep(2)
+                await mod_channel.send(server_reply)
+                await asyncio.sleep(2)
+                user_reply += "This message has been deleted, as it violates our policy for terrorism. Please refer to our terms of service for what is acceptable on our platform." + "\n-\n-\n"
+                await mod_channel.send(user_reply)
+            else:
+                logs_reply += "As such, no action will be taken." "\n-\n-\n"
+                await mod_channel.send(logs_reply)
 
-            else: 
-                reply += "This message does not violate our policy on terrorism " + "\n-\n-\n"
-
-            reply += "just for logging, this was the actual gemini reply" + response.text
-
-            await mod_channel.send(f'Forwarded message:\n{message.author.name}: "{message.content}"')
-            await asyncio.sleep(1)
-            await mod_channel.send(reply)
-
+            await asyncio.sleep(5)
 
         except Exception as e:
                 # Get the stack trace as a string

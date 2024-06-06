@@ -295,7 +295,7 @@ class Report:
     
     def get_moderation_message_to_user(self):
         try:
-            report_type, reported_content = self.get_report_info()
+            report_type, reported_content, _, _ = self.get_report_info()
             #reported_guild = reported_content[0]
             #reported_channel = reported_content[1]
             reported_message = reported_content[2]
@@ -326,7 +326,7 @@ class Report:
 
     def get_platform_action(self):
         try:
-            report_type, reported_content = self.get_report_info()
+            report_type, reported_content, _, _ = self.get_report_info()
 
             reported_message = reported_content[2]
             reply = "\nSERVER_ACTION (pending moderator approval)\n"
@@ -334,7 +334,7 @@ class Report:
             reply += "```" + reported_message.author.name + ": " + reported_message.content + "```"
 
             if report_type == "glorification or promotion":
-                reply += "The content has been also been uploaded to the GIFCT hash bank if it wasn't already."
+                reply += "If applicable, the content has been also been uploaded to the GIFCT hash bank if it wasn't already."
 
             elif report_type in self.terrorism_categories:
                 reply += "A report of this incident has been sent to local authorities and/or the FBI, including the nature of the violation, user information, and activity."
