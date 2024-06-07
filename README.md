@@ -1,3 +1,24 @@
+# Group 19 Backend Documentation!
+
+automatic evaluation (milestone three work) -
+
+Every file not in the DiscordBot folder was code toward finetuning our custom Gemini model. The jsonl files are our datasets (after preprocessing), and most of the python files are the scripts for processing the raw csv files collected to be our dataset. They're a bit messy, since we had some data that we wanted for sure to be in the test set (ones we pulled straight from academic papers). The finetune.py file was an attempt at using the VertexAI to finetune, but in the end, we used Vertex's AutoML feature to train straight from the model playground (it was much easier). 
+
+In DiscordBot, gemini_testing.py is the script used to evaluate base Gemini on our test set and get its results. We then evaluated the results by hand. A similar process was performed for testing the finetuned Bison model, except the API was frustrating to use, so we ended up using the cloud terminal straight in GCP to run a similar script to gemini_testing.py but on the finetuned model ... so, that was super fun. The structure of bot.py for the automated detection was fairly straightforward .. send every message to perspective and send messages to the mod channel based on the severity of the results, send every message to base gemini (not the fine-tuned model, since performance was roughly equal and base gemini was cheaper) and send messages to the mod channel based on the results.
+
+user reporting flow (milestone two work)-
+
+this is basically all stuff from milestone two, which is already graded, but some more detailed extensions to the flow have been added since then in the same style as before.
+
+
+
+
+
+
+
+
+
+
 # CS 152 - Trust and Safety Engineering
 ## Discord Bot Framework Code
 
